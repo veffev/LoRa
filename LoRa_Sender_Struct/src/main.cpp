@@ -99,6 +99,12 @@ void loop()
   Serial.println(msg.id);
 
   // Trasmette il messaggio come buffer binario
+  //(uint8_t*)&msg è un puntatore ad un buffer in cui i dati inviati/ricevuti devono essere copiati, 
+  //in questo caso passo l'indirizzo della variabile msg che è una struct,
+  // il cast (uint8_t*) è necessario perchè radio.receive si aspetta un puntatore a un array di byte (uint8_t*), mentre msg è una struct,
+  // il cast fa si che il compilatore interpreti correttamente il puntatore come un array di byte
+  // sizeof(msg) specifica la dim del buffer, cioè quanti byte deve leggere radio.receive o inviare radio.trasmit, in questo caso 2 byte
+  //la funzione restitutisce un intero (state) che rappresenta l'esito dell'operazione
   int state = radio.transmit((uint8_t*)&msg, sizeof(msg));
 
   if (state == RADIOLIB_ERR_NONE)
