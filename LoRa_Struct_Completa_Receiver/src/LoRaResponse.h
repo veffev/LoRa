@@ -1,5 +1,3 @@
-// LoRaResponse.h
-
 #ifndef LORA_RESPONSE_H
 #define LORA_RESPONSE_H
 
@@ -14,7 +12,7 @@ struct LoRaResponsePacket
     int32_t parking_latitude;  // Latitudine del parcheggio in formato Fixed-Point
     int32_t parking_longitude; // Longitudine del parcheggio in formato Fixed-Point
     uint16_t distance;         // Distanza in metri
-    uint8_t available_slots;   // Numero di posti disponibili
+    uint8_t request_status;    // Stato della richiesta (0x00: nessun parcheggio, 0x01: parcheggio trovato, ecc.)
 } __attribute__((packed));
 
 void printResponse(const LoRaResponsePacket &response);
@@ -24,7 +22,7 @@ void generateResponse(
   float parkingLatitude,            // Latitudine del parcheggio
   float parkingLongitude,           // Longitudine del parcheggio
   uint16_t distance,                // Distanza in metri
-  uint8_t availableSlots,           // Numero di posti disponibili
+  uint8_t requestStatus,            // Stato della richiesta
   LoRaResponsePacket& response      // Pacchetto di risposta da preparare
 );
 
