@@ -15,6 +15,8 @@
 #define LoRa_nrst 12
 #define LoRa_busy 13
 
+int count = 0;
+
 // Inizializzazione del display OLED e del modulo LoRa
 U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, oled_scl, oled_sda, oled_rst);
 SX1262 radio = new Module(LoRa_nss, LoRa_dio1, LoRa_nrst, LoRa_busy);
@@ -24,8 +26,8 @@ struct AckPacket
   uint8_t id[16]; // ID univoco della richiesta
 } __attribute__((packed));
 
-// Funzione per attendere una risposta dal receiver entro un timeout, 
-//e mi permettte di verificare che il pacchetto ricevuto sia il dato atteso
+// Funzione per attendere una risposta dal receiver entro un timeout,
+// e mi permettte di verificare che il pacchetto ricevuto sia il dato atteso
 bool waitForResponse(uint32_t timeout, LoRaResponsePacket &response, uint8_t *expectedID);
 
 void setup()
@@ -55,6 +57,7 @@ void setup()
 
 void loop()
 {
+
   // Creazione del pacchetto di richiesta
   LoRaPacket packet;
   packet.type = 0x01; // Tipo di messaggio: richiesta di parcheggio
@@ -63,7 +66,7 @@ void loop()
   const char *vehiclePlate = "ABC123"; // Targa del veicolo
   float latitude = 37.502;             // Latitudine simulata
   float longitude = 15.087;            // Longitudine simulata
-  uint8_t requestStatus = 0x01;        // Stato richiesta: attiva
+  uint8_t requestStatus = 0x00;        // Stato richiesta: attiva
 
   // Generazione del pacchetto di richiesta
   generateRequest(vehiclePlate, latitude, longitude, requestStatus, packet);
@@ -76,6 +79,13 @@ void loop()
   if (state == RADIOLIB_ERR_NONE)
   {
     Serial.println("[SX1262] Richiesta inviata con successo!");
+
+    // Ora il transmitter deve tornare in ricezione
+    state = radio.startReceive();
+    if (state != RADIOLIB_ERR_NONE)
+    {
+      Serial.printf("[SX1262] Errore rientro in ricezione: %d\n", state);
+    }
 
     // Attende l'ACK dal receiver
     AckPacket ack;
@@ -98,8 +108,8 @@ void loop()
     {
       // Attesa della risposta dal receiver
       LoRaResponsePacket response;
-      if (waitForResponse(30000, response, packet.id))
-      { // Timeout di 30 secondi
+      if (waitForResponse(50000, response, packet.id))
+      { // Timeout di 50 secondi
         printResponse(response);
       }
       else
